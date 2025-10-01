@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Job Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            {% if user.name %}
+                <small class="text-muted">Welcome back, {{ user.name }}!</small>
+            {% endif %}
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.total_jobs }}</h4>
+                        <p class="card-text">Active Jobs</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-briefcase fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.total_companies }}</h4>
+                        <p class="card-text">Companies</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-building fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.match_count }}</h4>
+                        <p class="card-text">Job Matches</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-heart fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.applied_jobs }}</h4>
+                        <p class="card-text">Applications</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-paper-plane fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="/profile" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-user me-2"></i>Update Profile
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-outline-success w-100" onclick="refreshMatches()">
+                            <i class="fas fa-sync me-2"></i>Refresh Matches
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/jobs" class="btn btn-outline-info w-100">
+                            <i class="fas fa-search me-2"></i>Browse Jobs
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/analytics" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-chart-bar me-2"></i>View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Job Matches -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Top Job Matches</h5>
+                <a href="/matches" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_matches %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Company</th>
+                                    <th>Location</th>
+                                    <th>Match Score</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for match in recent_matches %}
+                                <tr>
+                                    <td>
+                                        <a href="/job/{{ match.job.id }}" class="text-decoration-none">
+                                            {{ match.job.title }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if match.job.company %}
+                                            <a href="/company/{{ match.job.company.id }}" class="text-decoration-none">
+                                                {{ match.job.company.name }}
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ match.job.location or "Remote" }}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="width: 100px;">
+                                            <div class="progress-bar 
+                                                {% if match.overall_score >= 0.8 %}bg-success
+                                                {% elif match.overall_score >= 0.6 %}bg-warning
+                                                {% else %}bg-danger{% endif %}"
+                                                role="progressbar" 
+                                                style="width: {{ (match.overall_score * 100)|round }}%">
+                                                {{ (match.overall_score * 100)|round }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="/job/{{ match.job.id }}" class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if match.job.apply_url %}
+                                            <a href="{{ match.job.apply_url }}" target="_blank" class="btn btn-sm btn-success">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No job matches yet</h5>
+                        <p class="text-muted">Upload your resume to get personalized job matches!</p>
+                        <a href="/profile" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload Resume
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function refreshMatches() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/refresh-matches', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error refreshing matches: ' + data.detail);
+        }
+    } catch (error) {
+        alert('Error refreshing matches: ' + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,273 @@
+/* Custom styles for AI Job Agent */
+
+/* General styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Job cards */
+.job-card {
+    background: white;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.job-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.job-title a {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.job-title a:hover {
+    color: #0b5ed7;
+}
+
+.company-name a {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.company-name a:hover {
+    color: #495057;
+}
+
+.job-meta {
+    font-size: 0.875rem;
+}
+
+.job-description {
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+/* Match cards */
+.match-card {
+    background: white;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.match-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.match-score-circle {
+    padding: 1rem;
+    border-radius: 50%;
+    background: rgba(13, 110, 253, 0.1);
+    width: 120px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.match-breakdown .progress {
+    height: 8px;
+}
+
+.match-reasons {
+    font-size: 0.875rem;
+}
+
+/* Skills */
+.skills-container .badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Profile completeness */
+.stat-item {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.375rem;
+}
+
+/* Statistics cards */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info,
+.card.bg-warning {
+    border: none;
+}
+
+.card.bg-primary .card-body,
+.card.bg-success .card-body,
+.card.bg-info .card-body,
+.card.bg-warning .card-body {
+    padding: 1.5rem;
+}
+
+/* Progress bars */
+.progress {
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    border-radius: 0.375rem;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-info:hover,
+.btn-outline-warning:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Tables */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.025);
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: #0d6efd;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .match-score-circle {
+        width: 80px;
+        height: 80px;
+        padding: 0.5rem;
+    }
+    
+    .match-score-circle .h3 {
+        font-size: 1.25rem;
+    }
+    
+    .job-card .row,
+    .match-card .row {
+        flex-direction: column;
+    }
+    
+    .job-card .col-md-4,
+    .match-card .col-md-4 {
+        text-align: left !important;
+        margin-top: 1rem;
+    }
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.65;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Job detail page specific */
+.job-description {
+    line-height: 1.6;
+    color: #495057;
+}
+
+.benefits {
+    line-height: 1.6;
+    color: #495057;
+}
+
+.experience-content,
+.education-content {
+    line-height: 1.6;
+    color: #495057;
+}
+
+/* Company cards */
+.company-card {
+    background: white;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.company-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Analytics charts */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bs-body-bg: #212529;
+        --bs-body-color: #dee2e6;
+    }
+}

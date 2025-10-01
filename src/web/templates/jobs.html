@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Jobs - AI Job Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-briefcase me-2"></i>Job Listings</h1>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="/jobs">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" 
+                                   value="{{ filters.location or '' }}" placeholder="City, State">
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">Experience Level</label>
+                            <select class="form-select" name="experience_level">
+                                <option value="">All Levels</option>
+                                <option value="entry" {% if filters.experience_level == 'entry' %}selected{% endif %}>Entry Level</option>
+                                <option value="mid" {% if filters.experience_level == 'mid' %}selected{% endif %}>Mid Level</option>
+                                <option value="senior" {% if filters.experience_level == 'senior' %}selected{% endif %}>Senior Level</option>
+                                <option value="lead" {% if filters.experience_level == 'lead' %}selected{% endif %}>Lead/Principal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">Remote Option</label>
+                            <select class="form-select" name="remote_option">
+                                <option value="">All Options</option>
+                                <option value="remote" {% if filters.remote_option == 'remote' %}selected{% endif %}>Remote</option>
+                                <option value="hybrid" {% if filters.remote_option == 'hybrid' %}selected{% endif %}>Hybrid</option>
+                                <option value="onsite" {% if filters.remote_option == 'onsite' %}selected{% endif %}>On-site</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">Min Salary</label>
+                            <input type="number" class="form-control" name="min_salary" 
+                                   value="{{ filters.min_salary or '' }}" placeholder="50000">
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">Company Size</label>
+                            <select class="form-select" name="company_size">
+                                <option value="">All Sizes</option>
+                                <option value="startup" {% if filters.company_size == 'startup' %}selected{% endif %}>Startup</option>
+                                <option value="medium" {% if filters.company_size == 'medium' %}selected{% endif %}>Medium</option>
+                                <option value="large" {% if filters.company_size == 'large' %}selected{% endif %}>Large</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Results -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Job Results</h5>
+                <span class="badge bg-secondary">Page {{ page }} of {{ total_pages }}</span>
+            </div>
+            <div class="card-body">
+                {% if jobs %}
+                    {% for job in jobs %}
+                    <div class="job-card border rounded p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="job-title">
+                                    <a href="/job/{{ job.id }}" class="text-decoration-none">
+                                        {{ job.title }}
+                                    </a>
+                                </h5>
+                                <p class="company-name mb-1">
+                                    {% if job.company %}
+                                        <a href="/company/{{ job.company.id }}" class="text-decoration-none text-muted">
+                                            <i class="fas fa-building me-1"></i>{{ job.company.name }}
+                                        </a>
+                                    {% endif %}
+                                </p>
+                                <div class="job-meta text-muted small">
+                                    <span class="me-3">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ job.location or "Remote" }}
+                                    </span>
+                                    <span class="me-3">
+                                        <i class="fas fa-briefcase me-1"></i>{{ job.experience_level|title }}
+                                    </span>
+                                    {% if job.remote_option %}
+                                    <span class="me-3">
+                                        <i class="fas fa-home me-1"></i>{{ job.remote_option|title }}
+                                    </span>
+                                    {% endif %}
+                                    {% if job.salary_min or job.salary_max %}
+                                    <span class="me-3">
+                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        {% if job.salary_min and job.salary_max %}
+                                            ${{ "{:,}".format(job.salary_min) }} - ${{ "{:,}".format(job.salary_max) }}
+                                        {% elif job.salary_min %}
+                                            ${{ "{:,}".format(job.salary_min) }}+
+                                        {% elif job.salary_max %}
+                                            Up to ${{ "{:,}".format(job.salary_max) }}
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                {% if job.description %}
+                                <p class="job-description mt-2 text-muted">
+                                    {{ job.description[:200] }}{% if job.description|length > 200 %}...{% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 text-end">
+                                {% if job.job_score %}
+                                <div class="job-score mb-2">
+                                    <small class="text-muted">Job Score</small>
+                                    <div class="progress" style="width: 100px; margin-left: auto;">
+                                        <div class="progress-bar 
+                                            {% if job.job_score >= 0.8 %}bg-success
+                                            {% elif job.job_score >= 0.6 %}bg-warning
+                                            {% else %}bg-info{% endif %}"
+                                            role="progressbar" 
+                                            style="width: {{ (job.job_score * 100)|round }}%">
+                                            {{ (job.job_score * 100)|round }}%
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <div class="job-actions">
+                                    <a href="/job/{{ job.id }}" class="btn btn-outline-primary btn-sm me-1">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </a>
+                                    {% if job.apply_url %}
+                                    <a href="{{ job.apply_url }}" target="_blank" class="btn btn-success btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>Apply
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% if job.created_at %}
+                                <small class="text-muted d-block mt-2">
+                                    Posted {{ job.created_at.strftime('%b %d, %Y') }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No jobs found</h5>
+                        <p class="text-muted">Try adjusting your filters or search criteria.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <nav aria-label="Job pagination">
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page - 1 }}{% for key, value in filters.items() %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ p }}</span>
+                    </li>
+                    {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 2 and p <= page + 2) %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ p }}{% for key, value in filters.items() %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ p }}</a>
+                    </li>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page + 1 }}{% for key, value in filters.items() %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

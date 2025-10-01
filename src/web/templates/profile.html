@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - AI Job Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-user me-2"></i>User Profile</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Profile Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Personal Information</h5>
+            </div>
+            <div class="card-body">
+                {% if user.name or user.email or user.phone %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {% if user.name %}
+                        <p><strong>Name:</strong> {{ user.name }}</p>
+                        {% endif %}
+                        {% if user.email %}
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        {% endif %}
+                        {% if user.phone %}
+                        <p><strong>Phone:</strong> {{ user.phone }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if user.location %}
+                        <p><strong>Location:</strong> {{ user.location }}</p>
+                        {% endif %}
+                        {% if user.years_experience %}
+                        <p><strong>Experience:</strong> {{ user.years_experience }} years</p>
+                        {% endif %}
+                        {% if user.current_title %}
+                        <p><strong>Current Title:</strong> {{ user.current_title }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No profile information available. Upload your resume to get started!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Skills -->
+        {% if user.skills %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Skills</h5>
+            </div>
+            <div class="card-body">
+                <div class="skills-container">
+                    {% for skill in user.skills.split(',') %}
+                    <span class="badge bg-primary me-1 mb-1">{{ skill.strip() }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Experience -->
+        {% if user.experience %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Experience</h5>
+            </div>
+            <div class="card-body">
+                <div class="experience-content">
+                    {{ user.experience|replace('\n', '<br>')|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Education -->
+        {% if user.education %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Education</h5>
+            </div>
+            <div class="card-body">
+                <div class="education-content">
+                    {{ user.education|replace('\n', '<br>')|safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Job Preferences -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Job Preferences</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {% if user.preferred_locations %}
+                        <p><strong>Preferred Locations:</strong> {{ user.preferred_locations }}</p>
+                        {% endif %}
+                        {% if user.preferred_salary_min %}
+                        <p><strong>Minimum Salary:</strong> ${{ "{:,}".format(user.preferred_salary_min) }}</p>
+                        {% endif %}
+                        {% if user.preferred_remote %}
+                        <p><strong>Remote Work:</strong> {{ user.preferred_remote|title }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if user.preferred_company_size %}
+                        <p><strong>Company Size:</strong> {{ user.preferred_company_size|title }}</p>
+                        {% endif %}
+                        {% if user.preferred_industries %}
+                        <p><strong>Industries:</strong> {{ user.preferred_industries }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if not (user.preferred_locations or user.preferred_salary_min or user.preferred_remote or user.preferred_company_size or user.preferred_industries) %}
+                <p class="text-muted">No job preferences set. Upload your resume to extract preferences automatically.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Resume Upload -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Resume</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/profile/upload-resume" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="resume" class="form-label">Choose Resume File</label>
+                        <input type="file" class="form-control" id="resume" name="file" 
+                               accept=".pdf,.docx,.doc,.txt" required>
+                        <div class="form-text">Supported formats: PDF, DOCX, DOC, TXT</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-upload me-2"></i>Upload & Parse
+                    </button>
+                </form>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Your resume will be parsed using AI to extract skills, experience, and preferences automatically.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Profile Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="stat-item d-flex justify-content-between mb-2">
+                    <span>Profile Completeness</span>
+                    <span class="badge bg-primary">
+                        {% set completeness = 0 %}
+                        {% if user.name %}{% set completeness = completeness + 15 %}{% endif %}
+                        {% if user.email %}{% set completeness = completeness + 10 %}{% endif %}
+                        {% if user.skills %}{% set completeness = completeness + 25 %}{% endif %}
+                        {% if user.experience %}{% set completeness = completeness + 25 %}{% endif %}
+                        {% if user.education %}{% set completeness = completeness + 15 %}{% endif %}
+                        {% if user.preferred_locations %}{% set completeness = completeness + 10 %}{% endif %}
+                        {{ completeness }}%
+                    </span>
+                </div>
+                
+                {% if user.updated_at %}
+                <div class="stat-item d-flex justify-content-between mb-2">
+                    <span>Last Updated</span>
+                    <small class="text-muted">{{ user.updated_at.strftime('%b %d, %Y') }}</small>
+                </div>
+                {% endif %}
+                
+                {% if user.created_at %}
+                <div class="stat-item d-flex justify-content-between">
+                    <span>Member Since</span>
+                    <small class="text-muted">{{ user.created_at.strftime('%b %d, %Y') }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-success" onclick="refreshMatches()">
+                        <i class="fas fa-sync me-2"></i>Refresh Job Matches
+                    </button>
+                    <a href="/matches" class="btn btn-outline-primary">
+                        <i class="fas fa-heart me-2"></i>View All Matches
+                    </a>
+                    <a href="/applications" class="btn btn-outline-info">
+                        <i class="fas fa-paper-plane me-2"></i>My Applications
+                    </a>
+                    <a href="/jobs" class="btn btn-outline-warning">
+                        <i class="fas fa-search me-2"></i>Browse Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function refreshMatches() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/refresh-matches', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert(`Success! Found ${data.match_count} job matches.`);
+        } else {
+            alert('Error refreshing matches: ' + data.detail);
+        }
+    } catch (error) {
+        alert('Error refreshing matches: ' + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

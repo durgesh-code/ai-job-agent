@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Job Matches - AI Job Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-heart me-2"></i>Your Job Matches</h1>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Matches</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="/matches">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Minimum Match Score</label>
+                            <select class="form-select" name="min_score">
+                                <option value="">All Matches</option>
+                                <option value="0.9" {% if min_score == 0.9 %}selected{% endif %}>90%+ (Excellent)</option>
+                                <option value="0.8" {% if min_score == 0.8 %}selected{% endif %}>80%+ (Very Good)</option>
+                                <option value="0.7" {% if min_score == 0.7 %}selected{% endif %}>70%+ (Good)</option>
+                                <option value="0.6" {% if min_score == 0.6 %}selected{% endif %}>60%+ (Fair)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-1"></i>Apply Filter
+                            </button>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end justify-content-end">
+                            <button type="button" class="btn btn-success" onclick="refreshMatches()">
+                                <i class="fas fa-sync me-1"></i>Refresh Matches
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Match Results -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Your Matches</h5>
+                <span class="badge bg-secondary">Page {{ page }} of {{ total_pages }}</span>
+            </div>
+            <div class="card-body">
+                {% if matches %}
+                    {% for match in matches %}
+                    <div class="match-card border rounded p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="job-title">
+                                    <a href="/job/{{ match.job.id }}" class="text-decoration-none">
+                                        {{ match.job.title }}
+                                    </a>
+                                </h5>
+                                <p class="company-name mb-1">
+                                    {% if match.job.company %}
+                                        <a href="/company/{{ match.job.company.id }}" class="text-decoration-none text-muted">
+                                            <i class="fas fa-building me-1"></i>{{ match.job.company.name }}
+                                        </a>
+                                    {% endif %}
+                                </p>
+                                <div class="job-meta text-muted small mb-2">
+                                    <span class="me-3">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ match.job.location or "Remote" }}
+                                    </span>
+                                    <span class="me-3">
+                                        <i class="fas fa-briefcase me-1"></i>{{ match.job.experience_level|title }}
+                                    </span>
+                                    {% if match.job.salary_min or match.job.salary_max %}
+                                    <span class="me-3">
+                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        {% if match.job.salary_min and match.job.salary_max %}
+                                            ${{ "{:,}".format(match.job.salary_min) }} - ${{ "{:,}".format(match.job.salary_max) }}
+                                        {% elif match.job.salary_min %}
+                                            ${{ "{:,}".format(match.job.salary_min) }}+
+                                        {% elif match.job.salary_max %}
+                                            Up to ${{ "{:,}".format(match.job.salary_max) }}
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Match Breakdown -->
+                                <div class="match-breakdown">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Skills Match:</small>
+                                            <div class="progress mb-1" style="height: 6px;">
+                                                <div class="progress-bar bg-primary" style="width: {{ (match.skill_score * 100)|round }}%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Experience Match:</small>
+                                            <div class="progress mb-1" style="height: 6px;">
+                                                <div class="progress-bar bg-success" style="width: {{ (match.experience_score * 100)|round }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if match.match_reasons %}
+                                <div class="match-reasons mt-2">
+                                    <small class="text-muted">
+                                        <strong>Why this matches:</strong>
+                                        {{ match.match_reasons.split('\n')[0] }}
+                                        {% if match.match_reasons.split('\n')|length > 1 %}...{% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <!-- Overall Match Score -->
+                                <div class="match-score mb-3">
+                                    <div class="match-score-circle text-center">
+                                        <span class="h3 
+                                            {% if match.overall_score >= 0.8 %}text-success
+                                            {% elif match.overall_score >= 0.6 %}text-warning
+                                            {% else %}text-danger{% endif %}">
+                                            {{ (match.overall_score * 100)|round }}%
+                                        </span>
+                                        <br><small class="text-muted">Match Score</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Actions -->
+                                <div class="match-actions">
+                                    <a href="/job/{{ match.job.id }}" class="btn btn-outline-primary btn-sm me-1 mb-1">
+                                        <i class="fas fa-eye me-1"></i>View Job
+                                    </a>
+                                    {% if match.job.apply_url %}
+                                    <a href="{{ match.job.apply_url }}" target="_blank" class="btn btn-success btn-sm mb-1">
+                                        <i class="fas fa-external-link-alt me-1"></i>Apply
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if match.created_at %}
+                                <small class="text-muted d-block mt-2">
+                                    Matched {{ match.created_at.strftime('%b %d, %Y') }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No job matches found</h5>
+                        <p class="text-muted">
+                            {% if min_score %}
+                                Try lowering the minimum match score filter.
+                            {% else %}
+                                Upload your resume to get personalized job matches!
+                            {% endif %}
+                        </p>
+                        <div class="mt-3">
+                            {% if min_score %}
+                                <a href="/matches" class="btn btn-primary me-2">
+                                    <i class="fas fa-filter me-1"></i>Clear Filters
+                                </a>
+                            {% endif %}
+                            <a href="/profile" class="btn btn-success">
+                                <i class="fas fa-upload me-1"></i>Upload Resume
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <nav aria-label="Match pagination">
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page - 1 }}{% if min_score %}&min_score={{ min_score }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ p }}</span>
+                    </li>
+                    {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 2 and p <= page + 2) %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ p }}{% if min_score %}&min_score={{ min_score }}{% endif %}">{{ p }}</a>
+                    </li>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page + 1 }}{% if min_score %}&min_score={{ min_score }}{% endif %}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+<script>
+async function refreshMatches() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/refresh-matches', { method: 'POST' });
+        const data = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error refreshing matches: ' + data.detail);
+        }
+    } catch (error) {
+        alert('Error refreshing matches: ' + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - AI Job Agent{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Job Market Analytics</h1>
+    </div>
+</div>
+
+<!-- Market Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.total_jobs }}</h4>
+                        <p class="card-text">Total Jobs</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-briefcase fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.remote_jobs }}</h4>
+                        <p class="card-text">Remote Jobs</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-home fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.remote_percentage|round }}%</h4>
+                        <p class="card-text">Remote Rate</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.top_companies|length }}</h4>
+                        <p class="card-text">Active Companies</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-building fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Experience Level Distribution -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Jobs by Experience Level</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.exp_levels %}
+                    {% for level, count in stats.exp_levels.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>{{ level|title }} Level</span>
+                            <span class="badge bg-primary">{{ count }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ (count / stats.total_jobs * 100)|round }}%">
+                                {{ (count / stats.total_jobs * 100)|round }}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No experience level data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Companies -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Top Hiring Companies</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.top_companies %}
+                    {% for company, count in stats.top_companies.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div>
+                            <strong>{{ company }}</strong>
+                        </div>
+                        <div>
+                            <span class="badge bg-success">{{ count }} jobs</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No company data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Insights -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Market Insights</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="insight-card p-3 border rounded">
+                            <h6 class="text-primary"><i class="fas fa-home me-2"></i>Remote Work Trend</h6>
+                            <p class="mb-0">
+                                {% if stats.remote_percentage > 50 %}
+                                    Remote work is dominant with {{ stats.remote_percentage|round }}% of jobs offering remote options.
+                                {% elif stats.remote_percentage > 30 %}
+                                    Remote work is growing with {{ stats.remote_percentage|round }}% of jobs offering remote options.
+                                {% else %}
+                                    Remote work is limited with only {{ stats.remote_percentage|round }}% of jobs offering remote options.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="insight-card p-3 border rounded">
+                            <h6 class="text-success"><i class="fas fa-chart-line me-2"></i>Job Market Health</h6>
+                            <p class="mb-0">
+                                {% if stats.total_jobs > 100 %}
+                                    Strong job market with {{ stats.total_jobs }} active positions across multiple companies.
+                                {% elif stats.total_jobs > 50 %}
+                                    Moderate job market with {{ stats.total_jobs }} active positions available.
+                                {% else %}
+                                    Limited job market with {{ stats.total_jobs }} active positions currently.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="insight-card p-3 border rounded">
+                            <h6 class="text-info"><i class="fas fa-users me-2"></i>Experience Demand</h6>
+                            <p class="mb-0">
+                                {% set max_level = stats.exp_levels.items()|list|sort(attribute='1', reverse=true)|first %}
+                                {% if max_level %}
+                                    Highest demand for {{ max_level[0]|title }} level positions with {{ max_level[1] }} openings.
+                                {% else %}
+                                    Experience level data not available.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-compass me-2"></i>Recommendations</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-star me-2 text-warning"></i>For Job Seekers</h6>
+                        <ul class="list-unstyled">
+                            {% if stats.remote_percentage > 40 %}
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Consider remote positions to expand opportunities</li>
+                            {% endif %}
+                            {% if stats.top_companies %}
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Focus on top hiring companies like {{ stats.top_companies.keys()|list|first }}</li>
+                            {% endif %}
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Keep your skills updated based on market demand</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-building me-2 text-primary"></i>Market Trends</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i>Remote work continues to be popular</li>
+                            <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i>Tech companies are actively hiring</li>
+                            <li class="mb-2"><i class="fas fa-arrow-up text-success me-2"></i>Multiple experience levels in demand</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
